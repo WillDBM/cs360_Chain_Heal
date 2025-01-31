@@ -60,6 +60,7 @@ int main(int argc, char **argv){
 	char name[100];
 	int num_nodes = 0;
 	Node *prev = NULL;
+	// loops untill all node have been created
 	while(scanf("%d %d %d %d %s", &x, &y, &current_PP, &max_PP, name) == 5) {
 		Node *node = (Node *)malloc(sizeof(Node));
 		node->name = strdup(name);
@@ -71,8 +72,65 @@ int main(int argc, char **argv){
 
 		prev = node;
 		num_nodes++;
-
 	}
+
+	// Creation of node array
+	Node *nodes[num_nodes];
+
+	for(int i = 0; i < num_nodes; i++) {
+		nodes[i] = prev;
+		prev = prev->previous;
+	}
+
+	// create a reference node for Urgosa in canse they aren't first
+	Node *urgosa;
+
+	// create adjacency list for nodes (creates graph)
+	for(int i = 0; i < num_nodes; i++) {
+		Node *current = nodes[i];
+		current->adj_size = 0;
+
+		//size of adj list
+		for(int j = 0; j < num_nodes; j++) {
+			// a node can't be in it's own adj list
+			if (i == j) 
+				continue;
+
+			// must be reachable
+			if (distance(current, nodes[j]) > jump_range)
+				continue;
+
+			current->adj_size++;
+		}
+
+		// allocate memory by multiplying size of node by list size
+		current->adj = (Node **)malloc(sizeof(Node *) * current->adj_size);
+
+		// keep track of adj list index
+		int adj_index = 0;
+
+		// finally add nodes to the index (I'm missing vectors)
+		for(int j = 0; j < num_nodes; j++) {
+			// same checks as the last loop
+			if (i == j || distance(current, nodes[j]) > jump_range)
+				continue;
+
+			// add to list and increment index
+			current->adj[adj_index] = nodes[j];
+			adj_index++;
+		}
+
+		if (strcmp(current->name, "Urgosa_the_Healing_Shaman") == 0)
+			urgosa = current;
+	}
+
+	// Allocation for path
+	best_healing = 0;
+	best_path_length = 0;
+	best_path = (Node **)malloc(sizeof(Node *) * num_jumps);
+	healing = (int *)malloc(sizeof(int *) * num_jumps);
+
+	
 
 	return 0;
 }
