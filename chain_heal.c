@@ -1,7 +1,9 @@
 /*  William Armentrout
     warmentr
     chain_heal.c
-    Description:
+    Description: A program that calculates the largest possible amount of healing
+    a spell called "Chain heal" can heal by bouncing between characters. The program
+    implements Depth First search to find the largest amount of healing.
 */ 
 
 // Only what we are allowed to use
@@ -11,6 +13,7 @@
 #include <unistd.h>
 #include <math.h>
 
+// node struct that represents characters
 typedef struct node{
 
 	char *name;
@@ -26,6 +29,7 @@ typedef struct node{
 
 } Node;
 
+// contains all global information
 typedef struct global{
 
 	// from command line
@@ -57,26 +61,16 @@ void DFS(Node *source, Node *previous, Global *global, int jumps, int healing_to
 		return;
 	}
 
-	//printf("made it pased\n");
-
 	source->previous = previous;
 	source->visited = 1;
 
 	// calculates the largest possible amount of healing that can be done.
-	//printf("Jumps: %d\n", jumps);
 	source->healing = rint((global->init_power) * pow(1 - global->power_reduction, jumps - 1));
-	//printf("Healing is: %d\n",source->healing);
 	// set healing lower if healing and current exceeds max
 	if (source->healing + source->current_PP > source->max_PP) {
 		source->healing = source->max_PP - source->current_PP;
-		//printf("healing was adjusted to %d\n", source->healing);
-	}else {
-		//printf("Healing wasn't adjusted");
 	}
-
-	//printf("Node: %s, Jumps: %d, Healing: %d (Current_PP: %d, Max_PP: %d)\n", source->name, jumps, source->healing, source->current_PP, source->max_PP);
 	
-	//printf("healing is %d\n", source->healing);
 	// add healing to total
 	healing_total += source->healing;
 
@@ -113,6 +107,7 @@ int main(int argc, char **argv){
 		return 0;
 	}
 
+	// set globals to appropriate values
 	Global global;
 	global.init_range = atoi(argv[1]);
 	global.jump_range = atoi(argv[2]);
@@ -127,7 +122,7 @@ int main(int argc, char **argv){
 	char name[100];
 	int num_nodes = 0;
 	Node *prev = NULL;
-	// loops untill all node have been created
+	// loops untill all nodes have been created
 	while(scanf("%d %d %d %d %s", &x, &y, &current_PP, &max_PP, name) == 5) {
 		Node *node = (Node *)malloc(sizeof(Node));
 		node->name = strdup(name);
@@ -140,7 +135,7 @@ int main(int argc, char **argv){
 		prev = node;
 		num_nodes++;
 	}
-	//printf("Nodes were properly created\n");
+	
 	// Creation of node array
 	Node *nodes[num_nodes];
 
@@ -149,7 +144,7 @@ int main(int argc, char **argv){
 		prev = prev->previous;
 	}
 
-	// create a reference node for Urgosa in canse they aren't first
+	// create a reference node for Urgosa
 	Node *urgosa;
 
 	// create adjacency list for nodes (creates graph)
@@ -157,7 +152,7 @@ int main(int argc, char **argv){
 		Node *current = nodes[i];
 		current->adj_size = 0;
 
-		//size of adj list
+		// size of adj list
 		for(int j = 0; j < num_nodes; j++) {
 			// a node can't be in it's own adj list
 			if (i == j) 
@@ -189,14 +184,14 @@ int main(int argc, char **argv){
 		if (strcmp(current->name, "Urgosa_the_Healing_Shaman") == 0)
 			urgosa = current;
 	}
-	//printf("adj lists were properly created\n");
+	
 
 	// Allocation for path
 	global.best_healing = 0;
 	global.best_path_length = 0;
 	global.best_path = (Node **)malloc(sizeof(Node *) * global.num_jumps);
 	global.healing = (int *)malloc(sizeof(int *) * global.num_jumps);
-	//printf("paths were properly allocated\n");
+	
 
 
 	// init ranges around urgosa
@@ -212,7 +207,6 @@ int main(int argc, char **argv){
 			DFS(nodes[i], NULL, &global, 1, 0);
 		}
 	}
-	//printf("DFS properly completed\n");
 
 	// output paths with amounts
 	for(int i = global.best_path_length - 1; i >= 0; i--) {
