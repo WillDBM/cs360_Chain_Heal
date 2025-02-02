@@ -44,7 +44,6 @@ float distance(Node *source, Node *destination){
 }
 
 /* Perforsm DFS Recursivly
- *
  * source:		source node
  * previous:		last source node
  * global:		global struct
@@ -52,7 +51,6 @@ float distance(Node *source, Node *destination){
  * healing_total:	amount healed thus far
  * */
 void DFS(Node *source, Node *previous, Global *global, int jumps, int healing_total) {
-	//printf("DFS has been called\n");
 
 	//exit cases
 	if (source->visited || jumps > global->num_jumps){
@@ -65,12 +63,18 @@ void DFS(Node *source, Node *previous, Global *global, int jumps, int healing_to
 	source->visited = 1;
 
 	// calculates the largest possible amount of healing that can be done.
+	//printf("Jumps: %d\n", jumps);
 	source->healing = rint((global->init_power) * pow(1 - global->power_reduction, jumps - 1));
+	//printf("Healing is: %d\n",source->healing);
 	// set healing lower if healing and current exceeds max
 	if (source->healing + source->current_PP > source->max_PP) {
 		source->healing = source->max_PP - source->current_PP;
 		//printf("healing was adjusted to %d\n", source->healing);
+	}else {
+		//printf("Healing wasn't adjusted");
 	}
+
+	//printf("Node: %s, Jumps: %d, Healing: %d (Current_PP: %d, Max_PP: %d)\n", source->name, jumps, source->healing, source->current_PP, source->max_PP);
 	
 	//printf("healing is %d\n", source->healing);
 	// add healing to total
@@ -114,7 +118,7 @@ int main(int argc, char **argv){
 	global.jump_range = atoi(argv[2]);
 	global.num_jumps = atoi(argv[3]);
 	global.init_power = atoi(argv[4]);
-	global.power_reduction = atoi(argv[5]);
+	global.power_reduction = atof(argv[5]);
 
 
 	// Node creation
